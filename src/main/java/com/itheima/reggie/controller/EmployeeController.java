@@ -50,6 +50,7 @@ public class EmployeeController {
         }
         // 6. 登录成功，将用户Id信息存入session
         request.getSession().setAttribute("employee", result.getId());
+        // 7. 将用户信息返回客户端
         return R.success(result);
     }
 }
