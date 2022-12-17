@@ -23,7 +23,7 @@ public class Employee implements Serializable {
      * 身份证号
      */
     private String idNumber;
-    private String status;
+    private Integer status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     @TableField(fill = FieldFill.INSERT)
