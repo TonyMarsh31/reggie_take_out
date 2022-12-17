@@ -25,8 +25,6 @@ public class EmployeeController {
 
     /**
      * 员工登录
-     *
-     * @param employee 员工信息
      */
     @PostMapping("/login")
     public R<Employee> login(@RequestBody Employee employee, HttpServletRequest request) {
@@ -52,5 +50,16 @@ public class EmployeeController {
         request.getSession().setAttribute("employee", result.getId());
         // 7. 将用户信息返回客户端
         return R.success(result);
+    }
+
+    /**
+     * 员工退出登录
+     */
+    @PostMapping("/logout")
+    public R<String> logout(HttpServletRequest request) {
+        // 1. 清除session中的用户Id信息
+        request.getSession().removeAttribute("employee");
+        // 2. 返回成功结果
+        return R.success("退出成功");
     }
 }
