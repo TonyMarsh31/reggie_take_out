@@ -104,4 +104,21 @@ public class EmployeeController {
         // 5. 返回结果 (分页查询的结果直接封装到pageParam对象中)
         return R.success(pageParam);
     }
+
+    /**
+     * 根据员工Id修改员工信息
+     *
+     * @param employee 员工信息封装类，包含员工ID，与更新后的信息
+     */
+    @PutMapping
+    public R<String> update(@RequestBody Employee employee, HttpServletRequest request) {
+        // 1. 设置更新时间
+        employee.setUpdateTime(LocalDateTime.now());
+        // 2. 设置更新人
+        Long CurrentUserID = (Long) request.getSession().getAttribute("employee");
+        employee.setUpdateUser(CurrentUserID);
+        // 3. 更新员工信息
+        employeeService.updateById(employee);
+        return R.success("更新成功");
+    }
 }
