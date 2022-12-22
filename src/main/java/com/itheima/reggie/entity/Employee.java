@@ -24,11 +24,12 @@ public class Employee implements Serializable {
      */
     private String idNumber;
     private Integer status;
+    @TableField(fill = FieldFill.INSERT) // 在插入时由mybatisPlus自动填充
     private LocalDateTime createTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE) // 在插入和更新时由mybatisPlus自动填充
     private LocalDateTime updateTime;
     @TableField(fill = FieldFill.INSERT)
     private Long createUser;
-
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 }
