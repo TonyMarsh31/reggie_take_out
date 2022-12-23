@@ -1,5 +1,6 @@
 package com.itheima.reggie.common;
 
+import com.itheima.reggie.exception.ObjectContainsNestedProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,5 +23,11 @@ public class GlobalExceptionHandler {
 
         }
         return R.error("系统异常");
+    }
+
+    @ExceptionHandler(ObjectContainsNestedProperties.class)
+    R<String> exceptionHandler(ObjectContainsNestedProperties e) {
+        log.error("系统异常", e);
+        return R.error(e.getMessage());
     }
 }
