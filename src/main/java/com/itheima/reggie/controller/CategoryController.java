@@ -34,4 +34,11 @@ public class CategoryController {
         categoryService.page(categoryPage, queryWrapper);
         return R.success(categoryPage);
     }
+
+    @DeleteMapping
+    public R<String> remove(Long id) {
+        //todo:删除之前需要进行判断:该分类是否已经关联了其他菜品或套餐，是则不能删除
+        categoryService.removeById(id);
+        return R.success("删除分类成功");
+    }
 }
