@@ -40,4 +40,10 @@ public class CategoryController {
         categoryService.remove(id);
         return R.success("删除分类成功");
     }
+
+    @PutMapping
+    public R<String> update(@RequestBody Category category) {
+        categoryService.updateById(category);
+        return R.success("修改分类成功");
+    }
 }
