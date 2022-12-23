@@ -1,42 +1,42 @@
-function getMemberList (params) {
+function getMemberList(params) {
   return $axios({
-    url: '/employee/page',
-    method: 'get',
-    params
-  })
+    url: "/employee/page",
+    method: "get",
+    params,
+  });
 }
 
 // 修改---启用禁用接口
-function enableOrDisableEmployee (params) {
+function enableOrDisableEmployee(params) {
   return $axios({
-    url: '/employee',
-    method: 'put',
-    data: { ...params }
-  })
+    url: "/employee",
+    method: "put",
+    data: { ...params },
+  });
 }
 
 // 新增---添加员工
-function addEmployee (params) {
+function addEmployee(params) {
   return $axios({
-    url: '/employee',
-    method: 'post',
-    data: { ...params }
-  })
+    url: "/employee",
+    method: "post",
+    data: { ...params },
+  });
 }
 
 // 修改---添加员工
-function editEmployee (params) {
+function editEmployee(params) {
   return $axios({
-    url: '/employee',
-    method: 'put',
-    data: { ...params }
-  })
+    url: "/employee",
+    method: "put",
+    data: { ...params },
+  });
 }
 
 // 修改页面反查详情接口
-function queryEmployeeById (id) {
+function queryEmployeeById(id) {
   return $axios({
     url: `/employee/${id}`,
-    method: 'get'
-  })
+    method: "get",
+  });
 }

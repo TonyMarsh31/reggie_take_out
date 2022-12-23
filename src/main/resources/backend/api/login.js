@@ -1,14 +1,14 @@
 function loginApi(data) {
   return $axios({
-    'url': '/employee/login',
-    'method': 'post',
-    data
-  })
+    url: "/employee/login",
+    method: "post",
+    data,
+  });
 }
 
-function logoutApi(){
+function logoutApi() {
   return $axios({
-    'url': '/employee/logout',
-    'method': 'post',
-  })
+    url: "/employee/logout",
+    method: "post",
+  });
 }
