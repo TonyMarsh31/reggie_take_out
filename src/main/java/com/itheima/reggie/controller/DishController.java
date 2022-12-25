@@ -69,4 +69,11 @@ public class DishController {
         dishDtoPage.setRecords(dishDtoList);
         return R.success(dishDtoPage);
     }
+
+    @GetMapping("/{id}")
+    public R<DishDto> getById(@PathVariable Long id) {
+        DishDto dishDto = dishService.getDishDtoWithFlavorById(id);
+        return R.success(dishDto);
+    }
+
 }
