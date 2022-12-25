@@ -41,6 +41,13 @@ public class DishController {
         return R.success("新增成功");
     }
 
+    @PutMapping
+    public R<String> update(@RequestBody DishDto dishDto) {
+        log.info("dishDto:{}", dishDto);
+        dishService.updateWithFlavor(dishDto);
+        return R.success("修改成功");
+    }
+
     @GetMapping("/page")
     public R<Page<DishDto>> page(int page, int pageSize, String name) {
         // 查询菜品信息
