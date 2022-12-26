@@ -83,4 +83,20 @@ public class DishController {
         return R.success(dishDto);
     }
 
+    /**
+     * 根据分类查询先关菜品信息
+     *
+     * @param dish 封装的查询条件
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish) {
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
+                .orderByAsc(dish.getSort() != null, Dish::getSort)
+                .orderByDesc(dish.getUpdateTime() != null, Dish::getUpdateTime);
+        List<Dish> result = dishService.list(queryWrapper);
+        return R.success(result);
+    }
+
 }
