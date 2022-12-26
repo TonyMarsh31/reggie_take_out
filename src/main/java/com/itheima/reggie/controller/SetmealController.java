@@ -58,9 +58,11 @@ public class SetmealController {
         List<SetmealDto> setmealDtoRecords = setmealPage.getRecords().stream()
                 .map(setmeal ->
                 {
+                    // 发现在前端(分页列表中)不需要展示嵌套的菜品信息，所以这里可以不用查询相关信息，只需要查询分类名称即可
                     SetmealDto setmealDto = new SetmealDto();
                     BeanUtils.copyProperties(setmeal, setmealDto);
                     setmealDto.setCategoryName(setmeal.getCategoryId() == null ? "无数据" : categoryService.getById(setmeal.getCategoryId()).getName());
+                    // 但是相关代码先暂时保留
                     LambdaQueryWrapper<SetmealDish> eq = new LambdaQueryWrapper<SetmealDish>().eq(SetmealDish::getSetmealId, setmeal.getId());
                     setmealDto.setSetmealDishes(setmealDishService.list(eq));
                     return setmealDto;
