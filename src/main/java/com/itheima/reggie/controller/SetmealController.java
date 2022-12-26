@@ -44,7 +44,27 @@ public class SetmealController {
     }
 
 
-    //todo 完成套餐的修改功能
+    @PutMapping
+    public R<String> update(@RequestBody SetmealDto setmealDto) {
+        log.info("套餐信息：{}", setmealDto);
+        setmealService.updateWithDish(setmealDto);
+        return R.success("修改套餐成功");
+    }
+
+    /**
+     * 根据id查询套餐信息，包裹嵌套的菜品信息等等，用于前端修改页面回显
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> getById(@PathVariable Long id) {
+        Setmeal setmeal = setmealService.getById(id);
+        SetmealDto setmealDto = new SetmealDto();
+        BeanUtils.copyProperties(setmeal, setmealDto);
+        List<SetmealDish> setmealDishList = setmealDishService.list(new LambdaQueryWrapper<SetmealDish>().eq(SetmealDish::getSetmealId, id));
+        setmealDto.setSetmealDishes(setmealDishList);
+        setmealDto.setCategoryName(categoryService.getById(setmeal.getCategoryId()).getName());
+        return R.success(setmealDto);
+    }
+
 
     @GetMapping("/page")
     public R<Page<SetmealDto>> page(int page, int pageSize, String name) {
