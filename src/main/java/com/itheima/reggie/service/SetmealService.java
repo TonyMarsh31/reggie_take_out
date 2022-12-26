@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
 
+import java.util.List;
+
 public interface SetmealService extends IService<Setmeal> {
 
     /**
@@ -12,4 +14,11 @@ public interface SetmealService extends IService<Setmeal> {
      * @param setmealDto 套餐信息
      */
     void saveWithDish(SetmealDto setmealDto);
+
+    /**
+     * 删除套餐的基本信息，以及该套餐对应的菜品信息(如有在售卖中的，则取消删除)
+     *
+     * @param ids 套餐主键列表
+     */
+    void deleteWithDish(List<Long> ids);
 }

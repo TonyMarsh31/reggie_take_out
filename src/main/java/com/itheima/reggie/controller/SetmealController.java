@@ -74,4 +74,12 @@ public class SetmealController {
         setmealDtoPage.setRecords(setmealDtoRecords);
         return R.success(setmealDtoPage);
     }
+
+
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids) {
+        // 需要删除 1.套餐信息 2.套餐与菜品的关系信息
+        setmealService.deleteWithDish(ids);
+        return R.success("删除套餐成功");
+    }
 }
