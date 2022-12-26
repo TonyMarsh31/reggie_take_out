@@ -93,6 +93,7 @@ public class DishController {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
                 .eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
+                .eq(dish.getStatus() != null, Dish::getStatus, 1) // 仅查询上架的菜品
                 .orderByAsc(dish.getSort() != null, Dish::getSort)
                 .orderByDesc(dish.getUpdateTime() != null, Dish::getUpdateTime);
         List<Dish> result = dishService.list(queryWrapper);
