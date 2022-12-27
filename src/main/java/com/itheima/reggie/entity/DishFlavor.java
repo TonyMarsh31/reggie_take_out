@@ -46,7 +46,17 @@ public class DishFlavor implements Serializable {
     private Long updateUser;
 
 
-    //是否删除
+    /**
+     * 逻辑删除，0未删除，1已删除
+     */
     private Integer isDeleted;
+
+    /**
+     * 逻辑删除 0 未删除 1 已删除
+     */
+    public DishFlavor setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+        return this;
+    }
 
 }

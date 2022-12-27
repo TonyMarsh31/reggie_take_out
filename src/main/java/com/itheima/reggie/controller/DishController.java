@@ -107,4 +107,11 @@ public class DishController {
         return R.success("修改成功");
     }
 
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids) {
+        // 需要进行逻辑删除的信息有：菜品信息、菜品口味信息
+        // 同时还需要判定，如果菜品目前正在起售中，那么不能删除
+        dishService.deleteWithFlavor(ids);
+        return R.success("删除套餐成功");
+    }
 }

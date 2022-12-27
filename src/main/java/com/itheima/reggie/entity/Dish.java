@@ -43,7 +43,9 @@ public class Dish implements Serializable {
     private String description;
 
 
-    //0 停售 1 起售
+    /**
+     * 0 停售 1 起售
+     */
     private Integer status;
 
 
@@ -65,5 +67,18 @@ public class Dish implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
+
+    /**
+     * 逻辑删除 0 未删除 1 已删除
+     */
+    private Integer isDeleted;
+
+    /**
+     * 逻辑删除 0 未删除 1 已删除
+     */
+    public Dish setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+        return this;
+    }
 
 }

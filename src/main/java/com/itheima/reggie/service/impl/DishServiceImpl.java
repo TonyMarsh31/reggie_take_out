@@ -28,9 +28,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     private final SetmealService setmealService;
     private final SetmealDishService setmealDishService;
 
-    public DishServiceImpl(DishFlavorService dishFlavorService, SetmealService setmealService, SetmealService setmealService1, SetmealDishService setmealDishService) {
+    public DishServiceImpl(DishFlavorService dishFlavorService, SetmealService setmealService, SetmealDishService setmealDishService) {
         this.dishFlavorService = dishFlavorService;
-        this.setmealService = setmealService1;
+        this.setmealService = setmealService;
         this.setmealDishService = setmealDishService;
     }
 
@@ -116,11 +116,33 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             });
         }
 
-        //正常的停售与起售菜品操作
+        //正常情况下的停售与起售菜品操作
         Dish newStatus = new Dish();
         newStatus.setStatus(status);
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(Dish::getId, ids);
         this.update(newStatus, queryWrapper);
+    }
+
+    /**
+     * 需要进行逻辑删除的信息有：菜品信息、菜品口味信息
+     * 同时还需要判定，如果菜品目前正在起售中，那么不能删除
+     * (由于只要菜品还在一个起售的套餐中，那么该菜品就无法停售，所以这里只要判断菜品是否起售即可，无需考虑与套餐的关系)
+     *
+     * @param ids 菜品id集合
+     */
+    @Override
+    public void deleteWithFlavor(List<Long> ids) {
+        //先查询菜品是否在起售中
+        List<Dish> dishes = this.list(new LambdaQueryWrapper<Dish>().in(Dish::getId, ids));
+        for (Dish dish : dishes) {
+            if (dish.getStatus() == 1) {
+                throw new ObjectStillOnStockException(dish.getName() + "菜品目前还在起售中，无法删除");
+            }
+        }
+        // 逻辑删除菜品口味信息
+        dishFlavorService.update(new DishFlavor().setIsDeleted(1), new LambdaQueryWrapper<DishFlavor>().in(DishFlavor::getDishId, ids));
+        // 逻辑删除菜品信息
+        this.update(new Dish().setIsDeleted(1), new LambdaQueryWrapper<Dish>().in(Dish::getId, ids));
     }
 }

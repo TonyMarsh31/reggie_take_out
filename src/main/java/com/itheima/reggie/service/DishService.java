@@ -29,8 +29,15 @@ public interface DishService extends IService<Dish> {
     /**
      * 修改菜品的销售状态：起售、停售
      *
-     * @param status 销售状态
+     * @param status 销售状态 0：停售，1：起售
      * @param ids    菜品id集合
      */
     void updateStatus(Integer status, List<Long> ids);
+
+    /**
+     * 需要进行逻辑删除的信息有：菜品信息、菜品口味信息
+     * 同时还需要判定，如果菜品目前正在起售中，那么不能删除
+     * (由于只要菜品还在一个起售的套餐中，那么该菜品就无法停售，所以这里只要判断菜品是否起售即可，无需考虑与套餐的关系)
+     */
+    void deleteWithFlavor(List<Long> ids);
 }
