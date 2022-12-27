@@ -69,15 +69,12 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     public void deleteWithDish(List<Long> ids) {
         // 先判断是否仍在售卖中，是则取消删除
         LambdaQueryWrapper<Setmeal> objectOnStock = new LambdaQueryWrapper<>();
-        objectOnStock.in(Setmeal::getId, ids)
-                .eq(Setmeal::getStatus, 1);
+        objectOnStock.in(Setmeal::getId, ids).eq(Setmeal::getStatus, 1);
         if (this.count(objectOnStock) > 0) {
             throw new ObjectStillOnStockException();
         }
-        // 需要删除的： 1. 套餐基本信息 2. 套餐对应的菜品信息
-        this.removeByIds(ids);
-        LambdaQueryWrapper<SetmealDish> setmealDishToBeRemoved = new LambdaQueryWrapper<>();
-        setmealDishToBeRemoved.in(SetmealDish::getSetmealId, ids);
-        setmealDishService.remove(setmealDishToBeRemoved);
+        // 需要删除的： 1. 套餐基本信息 2. 套餐对应的菜品信息 , 全部进行逻辑删除
+        this.update(new Setmeal().setIsDeleted(1), new LambdaQueryWrapper<Setmeal>().in(Setmeal::getId, ids));
+        setmealDishService.update(new SetmealDish().setIsDeleted(1), new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getSetmealId, ids));
     }
 }

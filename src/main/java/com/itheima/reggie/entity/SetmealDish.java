@@ -59,4 +59,9 @@ public class SetmealDish implements Serializable {
 
     //是否删除
     private Integer isDeleted;
+
+    public SetmealDish setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+        return this;
+    }
 }

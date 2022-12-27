@@ -31,7 +31,9 @@ public class Setmeal implements Serializable {
     private BigDecimal price;
 
 
-    //状态 0:停用 1:启用
+    /**
+     * 状态 0:停用 1:启用
+     */
     private Integer status;
 
 
@@ -61,5 +63,15 @@ public class Setmeal implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
+
+    /**
+     * 逻辑删除，0未删除，1已删除
+     */
+    private Integer isDeleted;
+
+    public Setmeal setIsDeleted(Integer isDeleted) {
+        this.isDeleted = isDeleted;
+        return this;
+    }
 
 }
