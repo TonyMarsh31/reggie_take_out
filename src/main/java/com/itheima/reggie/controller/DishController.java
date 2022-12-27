@@ -53,7 +53,10 @@ public class DishController {
         // 查询菜品信息
         Page<Dish> dishPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(name != null, Dish::getName, name).orderByDesc(Dish::getUpdateTime);
+        queryWrapper
+                .like(name != null, Dish::getName, name)
+                .orderByDesc(Dish::getUpdateTime)
+                .eq(Dish::getIsDeleted, 0); // 仅展示未删除的菜品
         dishService.page(dishPage, queryWrapper);
         // 目前dishPage中的分类信息是分类ID，需要转换为分类名称
         // 先将page<DIsh>对象转换为page<DishDto>对象,使用对象拷贝工具类BeanUtils
@@ -93,7 +96,8 @@ public class DishController {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
                 .eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
-                .eq(dish.getStatus() != null, Dish::getStatus, 1) // 仅查询上架的菜品
+                .eq(Dish::getStatus, 1) // 仅查询上架的菜品
+                .eq(Dish::getIsDeleted, 0) // 仅展示未逻辑删除的菜品
                 .orderByAsc(dish.getSort() != null, Dish::getSort)
                 .orderByDesc(dish.getUpdateTime() != null, Dish::getUpdateTime);
         List<Dish> result = dishService.list(queryWrapper);
