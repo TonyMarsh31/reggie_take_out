@@ -25,7 +25,7 @@ public interface SetmealService extends IService<Setmeal> {
     /**
      * 更新套餐的基本信息，以及该套餐对应的菜品信息
      *
-     * @param setmealDto
+     * @param setmealDto 套餐信息dto
      */
     void updateWithDish(SetmealDto setmealDto);
 

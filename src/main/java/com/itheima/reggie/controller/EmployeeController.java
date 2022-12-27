@@ -67,7 +67,7 @@ public class EmployeeController {
      * @param employee 员工信息
      */
     @PostMapping
-    public R<String> addNewEmployee(@RequestBody Employee employee, HttpServletRequest request) {
+    public R<String> addNewEmployee(@RequestBody Employee employee) {
         // 1. 新员工默认密码为123456
         String password = DigestUtils.md5DigestAsHex("123456".getBytes());
         employee.setPassword(password);
@@ -105,7 +105,7 @@ public class EmployeeController {
      * @param employee 员工信息封装类，包含员工ID，与更新后的信息
      */
     @PutMapping
-    public R<String> update(@RequestBody Employee employee, HttpServletRequest request) {
+    public R<String> update(@RequestBody Employee employee) {
         employeeService.updateById(employee);
         return R.success("更新成功");
     }
