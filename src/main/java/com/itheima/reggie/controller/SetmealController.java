@@ -102,4 +102,18 @@ public class SetmealController {
         setmealService.deleteWithDish(ids);
         return R.success("删除套餐成功");
     }
+
+
+    /**
+     * 修改 停售、起售状态
+     *
+     * @param status 新的状态，1: 起售，0: 停售
+     * @param ids    套餐id集合
+     */
+    @PostMapping("/status/{status}")
+    public R<String> updateStatus(@PathVariable Integer status, @RequestParam List<Long> ids) {
+        log.info("status:{},ids:{}", status, ids);
+        setmealService.updateStatus(status, ids);
+        return R.success("修改成功");
+    }
 }

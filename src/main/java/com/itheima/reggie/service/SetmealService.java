@@ -28,4 +28,12 @@ public interface SetmealService extends IService<Setmeal> {
      * @param setmealDto
      */
     void updateWithDish(SetmealDto setmealDto);
+
+    /**
+     * 修改 停售、起售状态
+     *
+     * @param status 新的状态，1：起售，0: 停售
+     * @param ids    套餐主键列表
+     */
+    void updateStatus(Integer status, List<Long> ids);
 }
