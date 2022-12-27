@@ -73,7 +73,8 @@ public class SetmealController {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
                 .like(StringUtils.isNotBlank(name), Setmeal::getName, name)
-                .orderByDesc(Setmeal::getUpdateTime);
+                .orderByDesc(Setmeal::getUpdateTime)
+                .eq(Setmeal::getIsDeleted, 0);
         setmealService.page(setmealPage, queryWrapper);
         //将setmealPage转换为setmealDtoPage,添加分类名称与嵌套的菜品信息
         Page<SetmealDto> setmealDtoPage = new Page<>();
