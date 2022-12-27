@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 
+import java.util.List;
+
 public interface DishService extends IService<Dish> {
 
     /**
@@ -24,4 +26,11 @@ public interface DishService extends IService<Dish> {
      */
     DishDto getDishDtoWithFlavorById(Long id);
 
+    /**
+     * 修改菜品的销售状态：起售、停售
+     *
+     * @param status 销售状态
+     * @param ids    菜品id集合
+     */
+    void updateStatus(Integer status, List<Long> ids);
 }

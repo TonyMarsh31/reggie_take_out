@@ -100,4 +100,11 @@ public class DishController {
         return R.success(result);
     }
 
+    @PostMapping("/status/{status}")
+    public R<String> updateStatus(@PathVariable Integer status, @RequestParam List<Long> ids) {
+        log.info("status:{},ids:{}", status, ids);
+        dishService.updateStatus(status, ids);
+        return R.success("修改成功");
+    }
+
 }

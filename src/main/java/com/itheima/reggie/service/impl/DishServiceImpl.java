@@ -78,4 +78,19 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         dishDto.setFlavors(flavors);
         return dishDto;
     }
+
+    /**
+     * 修改菜品的销售状态：起售、停售
+     *
+     * @param status 销售状态
+     * @param ids    菜品id集合
+     */
+    @Override
+    public void updateStatus(Integer status, List<Long> ids) {
+        Dish newStatus = new Dish();
+        newStatus.setStatus(status);
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+        this.update(newStatus, queryWrapper);
+    }
 }
