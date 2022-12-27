@@ -87,6 +87,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      */
     @Override
     public void updateStatus(Integer status, List<Long> ids) {
+        //todo 需要完善的地方：当菜品在一个起售中的套餐中时，无法进行停售操作，提示用户需要先停售套餐
         Dish newStatus = new Dish();
         newStatus.setStatus(status);
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
