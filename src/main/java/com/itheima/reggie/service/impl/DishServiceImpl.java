@@ -110,7 +110,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                 List<SetmealDish> onSaleSetmealDish = setmealDishService.list(setmealDishOnSale);
                 onSaleSetmealDish.stream().map(SetmealDish::getDishId).forEach(onSaleDishID -> {
                     if (ids.contains(onSaleDishID)) {
-                        throw new ObjectStillOnStockException("存在菜品在起售中的套餐中，无法进行停售操作");
+                        throw new ObjectStillOnStockException("所要停售的部分菜品目前还在其他套餐中进行贩卖中，无法停售，请考虑先停售套餐");
                     }
                 });
             });
