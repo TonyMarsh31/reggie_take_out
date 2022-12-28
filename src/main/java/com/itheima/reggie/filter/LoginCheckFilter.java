@@ -31,6 +31,8 @@ public class LoginCheckFilter implements Filter {
                 "/employee/logout",
                 "/backend/**", // 静态资源
                 "/front/**", // 静态资源
+                "/user/login", // 用户端登录
+                "/user/sendMsg",
         };
         if (requestIsExcluded(requestURI, excludedUrls)) {
             filterChain.doFilter(request, response);
