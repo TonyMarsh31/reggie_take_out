@@ -6,9 +6,17 @@ function loginApi(data) {
   });
 }
 
-function loginoutApi() {
+function logoutApi() {
   return $axios({
-    url: "/user/loginout",
+    url: "/user/logout",
     method: "post",
+  });
+}
+
+function sendMsgApi(data) {
+  return $axios({
+    url: "/user/sendMsg",
+    method: "post",
+    data,
   });
 }
