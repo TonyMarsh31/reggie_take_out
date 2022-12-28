@@ -54,12 +54,12 @@ public class UserController {
      * @param args 前段传递的参数，包含手机号和验证码
      */
     @PostMapping("/login")
-    public R<User> login(@RequestBody Map args, HttpSession session) {
+    public R<User> login(@RequestBody Map<String, String> args, HttpSession session) {
         log.info(args.toString());
         //获取手机号
-        String phone = args.get("phone").toString();
+        String phone = args.get("phone");
         //获取验证码
-        String code = args.get("code").toString();
+        String code = args.get("code");
         //从Session中获取保存的验证码
         Object codeInSession = session.getAttribute(phone);
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
