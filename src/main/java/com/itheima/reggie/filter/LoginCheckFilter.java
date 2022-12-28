@@ -38,8 +38,15 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request, response);
             return;
         }
+        // 若管理端用户已登录(Session中存在对应属性),则放行
         if (request.getSession().getAttribute("employee") != null) {
             BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // 若客户端用户已登录(Session中存在对应属性),则放行
+        if (request.getSession().getAttribute("user") != null) {
+            BaseContext.setCurrentId((Long) request.getSession().getAttribute("user"));
             filterChain.doFilter(request, response);
             return;
         }
