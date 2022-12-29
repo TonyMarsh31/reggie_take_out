@@ -108,15 +108,15 @@
 }
 
 #address_edit .divContent .divItem .spanActiveCompany {
-  background: #e1f1fe;
+  background: #a4f117;
 }
 
 #address_edit .divContent .divItem .spanActiveHome {
-  background: #fef8e7;
+  background: #d55221;
 }
 
 #address_edit .divContent .divItem .spanActiveSchool {
-  background: #e7fef8;
+  background: #109bd8;
 }
 
 #address_edit .divContent .divItem .el-input__inner {
