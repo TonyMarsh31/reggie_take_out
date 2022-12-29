@@ -37,6 +37,7 @@ public class ShoppingCartController {
     @PostMapping("/add")
     public R<ShoppingCart> add(@RequestBody ShoppingCart reqData) {
         log.info("购物车数据:{}", reqData);
+        //查询当前要操作的商品是否已经在用户的购物车中
         ShoppingCart cartDataInDB = shoppingCartService.getShoppingCartByID(reqData);
         Optional<ShoppingCart> cartDataOpt = Optional.ofNullable(cartDataInDB);
         cartDataOpt.ifPresent(dataInDB -> {
