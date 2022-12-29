@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.CategoryService;
+import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -24,11 +26,13 @@ import java.util.stream.Collectors;
 public class DishController {
     private final DishService dishService;
     private final CategoryService categoryService;
+    private final DishFlavorService dishFlavorService;
 
 
-    public DishController(DishService dishService, CategoryService categoryService) {
+    public DishController(DishService dishService, CategoryService categoryService, DishFlavorService dishFlavorService) {
         this.dishService = dishService;
         this.categoryService = categoryService;
+        this.dishFlavorService = dishFlavorService;
     }
 
     @PostMapping
@@ -86,19 +90,29 @@ public class DishController {
     /**
      * 根据分类查询先关菜品信息
      *
-     * @param dish 封装的查询条件
+     * @param condition 封装的查询条件
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish) {
+    public R<List<DishDto>> list(Dish condition) {
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
-                .eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
+                .eq(condition.getCategoryId() != null, Dish::getCategoryId, condition.getCategoryId())
                 .eq(Dish::getStatus, 1) // 仅查询上架的菜品
                 .eq(Dish::getIsDeleted, 0) // 仅展示未逻辑删除的菜品
-                .orderByAsc(dish.getSort() != null, Dish::getSort)
-                .orderByDesc(dish.getUpdateTime() != null, Dish::getUpdateTime);
-        List<Dish> result = dishService.list(queryWrapper);
-        return R.success(result);
+                .orderByAsc(condition.getSort() != null, Dish::getSort)
+                .orderByDesc(condition.getUpdateTime() != null, Dish::getUpdateTime);
+        List<Dish> dishList = dishService.list(queryWrapper);
+        // 将Dish对象转换为DishDto对象,添加口味数据
+        List<DishDto> dishDtoList = dishList.stream().map(dish -> {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(dish, dishDto);
+            // 查询口味信息
+            List<DishFlavor> dishFlavorList = dishFlavorService.list(
+                    new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dish.getId()));
+            dishDto.setFlavors(dishFlavorList);
+            return dishDto;
+        }).collect(Collectors.toList());
+        return R.success(dishDtoList);
     }
 
     @PostMapping("/status/{status}")
