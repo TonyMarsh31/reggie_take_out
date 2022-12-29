@@ -44,11 +44,11 @@ public class SetmealController {
      * 根据分类查询套餐
      */
     @GetMapping("/list")
-    public R<List<Setmeal>> list(Long categoryId, Integer status) {
+    public R<List<Setmeal>> list(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(categoryId != null, Setmeal::getCategoryId, categoryId)
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId())
                 .eq(Setmeal::getIsDeleted, 0)
-                .eq(status != null, Setmeal::getStatus, status);
+                .eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
         List<Setmeal> setmealList = setmealService.list(queryWrapper);
         return R.success(setmealList);
     }
