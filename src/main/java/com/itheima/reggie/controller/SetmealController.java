@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.SetmealDto;
+import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.service.CategoryService;
+import com.itheima.reggie.service.DishService;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +31,42 @@ public class SetmealController {
     private final SetmealService setmealService;
     private final CategoryService categoryService;
     private final SetmealDishService setmealDishService;
+    private final DishService dishService;
 
-    public SetmealController(SetmealService setmealService, CategoryService categoryService, SetmealDishService setmealDishService) {
+    public SetmealController(SetmealService setmealService, CategoryService categoryService, SetmealDishService setmealDishService, DishService dishService) {
         this.setmealService = setmealService;
         this.categoryService = categoryService;
         this.setmealDishService = setmealDishService;
+        this.dishService = dishService;
+    }
+
+    /**
+     * 根据分类查询套餐
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Long categoryId, Integer status) {
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(categoryId != null, Setmeal::getCategoryId, categoryId)
+                .eq(Setmeal::getIsDeleted, 0)
+                .eq(status != null, Setmeal::getStatus, status);
+        List<Setmeal> setmealList = setmealService.list(queryWrapper);
+        return R.success(setmealList);
+    }
+
+    /**
+     * 查询一个套餐下的具体菜品信息
+     *
+     * @param setmeal 封装的查询条件
+     */
+    // todo 不知道前端的请求路径，暂时空置
+    public R<List<Dish>> getDish(Setmeal setmeal) {
+        // 1.查关系表，获取套餐绑定的菜品ID
+        List<SetmealDish> setmealDishList = setmealDishService.list(new LambdaQueryWrapper<SetmealDish>()
+                .eq(setmeal.getId() != null, SetmealDish::getSetmealId, setmeal.getId()));
+        List<Long> dishIds = setmealDishList.stream().map(SetmealDish::getDishId).collect(Collectors.toList());
+        // 2.根据菜品ID查询菜品信息
+        List<Dish> dishList = dishService.list(new LambdaQueryWrapper<Dish>().in(Dish::getId, dishIds));
+        return R.success(dishList);
     }
 
     @PostMapping
