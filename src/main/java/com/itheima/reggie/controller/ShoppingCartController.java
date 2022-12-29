@@ -69,7 +69,7 @@ public class ShoppingCartController {
             shoppingCartService.updateById(cartDataInDB);
         } else {
             shoppingCartService.removeById(cartDataInDB.getId());
-            return R.error("商品删除"); //只要不是success，前端就会执行自定义操作，该error信息不回按照一般error流程处理
+            cartDataInDB.setNumber(0); // 这一步仅为符合前端的DTO规范：前端通过response.data.number来判断是否删除了商品
         }
         return R.success(cartDataInDB);
     }
