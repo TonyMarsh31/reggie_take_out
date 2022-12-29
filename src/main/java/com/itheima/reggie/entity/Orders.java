@@ -19,7 +19,9 @@ public class Orders implements Serializable {
     //订单号
     private String number;
 
-    //订单状态 1待付款，2待派送，3已派送，4已完成，5已取消
+    /**
+     * 订单状态 1待付款，2待派送，3已派送，4已完成，5已取消
+     */
     private Integer status;
 
 
