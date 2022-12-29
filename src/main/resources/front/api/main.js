@@ -27,7 +27,9 @@ function setmealListApi(data) {
 //获取购物车内商品的集合
 function cartListApi(data) {
   return $axios({
-    url: "/shoppingCart/list",
+    // url: "/shoppingCart/list",
+    // todo 临时使用,待后端接口完成后,再修改回来
+    url: "/front/cartData.json",
     method: "get",
     params: { ...data },
   });
