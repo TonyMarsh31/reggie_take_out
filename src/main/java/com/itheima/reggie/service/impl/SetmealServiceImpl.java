@@ -52,8 +52,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         // 1. 更新套餐的基本信息
         this.updateById(setmealDto);
         // 2. 更新套餐对应的菜品信息到关系表中,先删除，再新增
-        setmealDishService.remove(new LambdaQueryWrapper<SetmealDish>()
-                .eq(SetmealDish::getSetmealId, setmealDto.getId()));
+        setmealDishService.lambdaUpdate()
+                .eq(SetmealDish::getSetmealId, setmealDto.getId())
+                .remove();
         List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
         // DTO中的菜品数据缺少套餐id，需要手动设置
         setmealDishes.forEach(setmealDish -> setmealDish.setSetmealId(setmealDto.getId()));
@@ -70,14 +71,16 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         // 先判断是否仍在售卖中，是则取消删除
         LambdaQueryWrapper<Setmeal> objectOnStock = new LambdaQueryWrapper<>();
         objectOnStock.in(Setmeal::getId, ids).eq(Setmeal::getStatus, 1);
-        if (this.count(objectOnStock) > 0) {
-            throw new ObjectStillOnStockException();
-        }
+        if (this.count(objectOnStock) > 0) throw new ObjectStillOnStockException();
         // 需要删除的： 1. 套餐基本信息 2. 套餐对应的菜品信息 , 全部进行逻辑删除
-        this.update(new Setmeal().setIsDeleted(1), new LambdaQueryWrapper<Setmeal>().in(Setmeal::getId, ids));
-        setmealDishService.update(new SetmealDish().setIsDeleted(1), new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getSetmealId, ids));
-        // 也可以使用LambdaUpdateWrapper
-        // setmealDishService.update(new UpdateWrapper<SetmealDish>().in("setmeal_id", ids).set("is_deleted", 1));
+        this.lambdaUpdate()
+                .in(Setmeal::getId, ids)
+                .set(Setmeal::getIsDeleted, 1)
+                .update();
+        setmealDishService.lambdaUpdate()
+                .in(SetmealDish::getSetmealId, ids)
+                .set(SetmealDish::getIsDeleted, 1)
+                .update();
     }
 
     /**
@@ -88,10 +91,9 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
      */
     @Override
     public void updateStatus(Integer status, List<Long> ids) {
-        Setmeal newStatus = new Setmeal();
-        newStatus.setStatus(status);
-        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Setmeal::getId, ids);
-        this.update(newStatus, queryWrapper);
+        this.lambdaUpdate()
+                .in(Setmeal::getId, ids)
+                .set(Setmeal::getStatus, status)
+                .update();
     }
 }

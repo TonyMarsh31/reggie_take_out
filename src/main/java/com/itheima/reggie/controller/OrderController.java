@@ -37,42 +37,37 @@ public class OrderController {
      */
     @PostMapping("/submit")
     public R<String> submit(@RequestBody Orders orders) {
-        log.info("订单数据：{}", orders);
         orderService.submit(orders);
         return R.success("下单成功");
     }
 
     @GetMapping("/page")
     public R<Page<OrdersDto>> page(int page, int pageSize, Long number, String beginTime, String endTime) {
-        //获取当前id
-        Page<Orders> pageInfo = new Page<>(page, pageSize);
-        Page<OrdersDto> ordersDtoPage = new Page<>(page, pageSize);
-        //条件构造器
+        //先查询订单表中的信息
+        Page<Orders> ordersPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
-        //按时间降序排序
-        queryWrapper.orderByDesc(Orders::getOrderTime);
-        //订单号
-        queryWrapper.eq(number != null, Orders::getId, number);
-        //时间段，大于开始，小于结束
-        queryWrapper.gt(!StringUtils.isEmpty(beginTime), Orders::getOrderTime, beginTime)
+        queryWrapper
+                .orderByDesc(Orders::getOrderTime) //按时间降序排序
+                .eq(number != null, Orders::getId, number) //订单号
+                //时间段，大于开始，小于结束
+                .gt(!StringUtils.isEmpty(beginTime), Orders::getOrderTime, beginTime)
                 .lt(!StringUtils.isEmpty(endTime), Orders::getOrderTime, endTime);
-        orderService.page(pageInfo, queryWrapper);
-        List<OrdersDto> list = pageInfo.getRecords().stream().map((item) -> {
+        orderService.page(ordersPage, queryWrapper);
+        //Page中的订单转换为订单DTO,添加订单详情表中的信息
+        List<OrdersDto> ordersDtoList = ordersPage.getRecords().stream().map((order) -> {
             OrdersDto ordersDto = new OrdersDto();
-            //获取orderId,然后根据这个id，去orderDetail表中查数据
-            Long orderId = item.getId();
-            LambdaQueryWrapper<OrderDetail> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(OrderDetail::getOrderId, orderId);
-            List<OrderDetail> details = orderDetailService.list(wrapper);
-            BeanUtils.copyProperties(item, ordersDto);
-            //之后set一下属性
-            ordersDto.setOrderDetails(details);
+            BeanUtils.copyProperties(order, ordersDto);
+            List<OrderDetail> orderDetailList = orderDetailService
+                    .lambdaQuery()
+                    .eq(OrderDetail::getOrderId, order.getId())
+                    .list();
+            ordersDto.setOrderDetails(orderDetailList);
             return ordersDto;
         }).collect(Collectors.toList());
-        BeanUtils.copyProperties(pageInfo, ordersDtoPage, "records");
-        ordersDtoPage.setRecords(list);
-        //日志输出看一下
-        log.info("list:{}", list);
+        //DTO转换为Page
+        Page<OrdersDto> ordersDtoPage = new Page<>(page, pageSize);
+        BeanUtils.copyProperties(ordersPage, ordersDtoPage, "records");
+        ordersDtoPage.setRecords(ordersDtoList);
         return R.success(ordersDtoPage);
     }
 }

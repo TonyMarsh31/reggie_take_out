@@ -18,11 +18,17 @@ public class R<T> {
      */
     private Integer code;
 
-    private String msg; //错误信息
+    /**
+     * 错误信息
+     */
+    private String msg;
 
     private T data; //数据
 
-    private Map<String, Object> map = new HashMap<>(); //动态数据
+    /**
+     * 动态数据
+     */
+    private Map<String, Object> map = new HashMap<>();
 
     public static <T> R<T> success(T object) {
         R<T> r = new R<>();

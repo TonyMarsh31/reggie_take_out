@@ -1,6 +1,5 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.ShoppingCart;
@@ -80,11 +79,11 @@ public class ShoppingCartController {
      */
     @GetMapping("/list")
     public R<List<ShoppingCart>> list() {
-        log.info("查看购物车...");
-        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
-        queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
-        List<ShoppingCart> list = shoppingCartService.list(queryWrapper);
+        List<ShoppingCart> list = shoppingCartService
+                .lambdaQuery()
+                .eq(ShoppingCart::getUserId, BaseContext.getCurrentId())
+                .orderByAsc(ShoppingCart::getCreateTime)
+                .list();
         return R.success(list);
     }
 
@@ -94,9 +93,10 @@ public class ShoppingCartController {
     @DeleteMapping("/clean")
     public R<String> clean() {
         //SQL:delete from shopping_cart where user_id = ?
-        LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentId());
-        shoppingCartService.remove(queryWrapper);
+        shoppingCartService
+                .lambdaUpdate()
+                .eq(ShoppingCart::getUserId, BaseContext.getCurrentId())
+                .remove();
         return R.success("清空购物车成功");
     }
 }

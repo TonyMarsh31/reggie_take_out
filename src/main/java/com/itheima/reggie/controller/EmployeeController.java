@@ -29,25 +29,20 @@ public class EmployeeController {
         // 1.将页面提交的密码进行加密
         String password = DigestUtils.md5DigestAsHex(employee.getPassword().getBytes());
         // 2. 根据用户名查询数据库
-        LambdaQueryWrapper<Employee> employeeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        employeeLambdaQueryWrapper.eq(Employee::getUsername, employee.getUsername());
-        Employee result = employeeService.getOne(employeeLambdaQueryWrapper);
+        Employee dataInDB = employeeService
+                .lambdaQuery()
+                .eq(Employee::getUsername, employee.getUsername())
+                .one();
         // 3. 如果没有查询则直接返回登录失败结果
-        if (result == null) {
-            return R.error("登陆失败，没有该用户名");
-        }
+        if (dataInDB == null) return R.error("登陆失败，没有该用户名");
         // 4. 如果查询到了，则进一步判断密码是否正确
-        if (!password.equals(result.getPassword())) {
-            return R.error("登陆失败，密码错误");
-        }
+        if (!password.equals(dataInDB.getPassword())) return R.error("登陆失败，密码错误");
         // 5. 查看员工状态是否被禁用
-        if (result.getStatus() == 0) {
-            return R.error("登陆失败，该用户已被禁用");
-        }
+        if (dataInDB.getStatus() == 0) return R.error("登陆失败，该用户已被禁用");
         // 6. 登录成功，将用户Id信息存入session
-        request.getSession().setAttribute("employee", result.getId());
+        request.getSession().setAttribute("employee", dataInDB.getId());
         // 7. 将用户信息返回客户端
-        return R.success(result);
+        return R.success(dataInDB);
     }
 
     /**
@@ -87,15 +82,10 @@ public class EmployeeController {
     @GetMapping("/page")
     public R<Page<Employee>> page(int page, int pageSize, String name) {
         log.info("page:{},pageSize:{},name:{}", page, pageSize, name);
-        // 1. 创建mybatis-plus封装的分页对象
         Page<Employee> pageParam = new Page<>(page, pageSize);
-        // 2. 创建mybatis-plus封装的查询条件对象
         LambdaQueryWrapper<Employee> employeeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        // 3. 如果查询条件不为空，则添加查询条件
         employeeLambdaQueryWrapper.like(name != null, Employee::getName, name);
-        // 4. 调用mybatis-plus的分页查询方法
         employeeService.page(pageParam, employeeLambdaQueryWrapper);
-        // 5. 返回结果 (分页查询的结果直接封装到pageParam对象中)
         return R.success(pageParam);
     }
 

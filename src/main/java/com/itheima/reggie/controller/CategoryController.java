@@ -22,7 +22,6 @@ public class CategoryController {
 
     @PostMapping
     public R<String> save(@RequestBody Category category) {
-        log.info("category:{}", category);
         categoryService.save(category);
         return R.success("新增分类成功");
     }
@@ -51,12 +50,12 @@ public class CategoryController {
 
     @GetMapping("/list")
     public R<List<Category>> list(Category category) {
-        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper
+        List<Category> list = categoryService
+                .lambdaQuery()
                 .eq(category.getType() != null, Category::getType, category.getType())
                 .orderByAsc(Category::getSort)
-                .orderByDesc(Category::getUpdateTime);
-        List<Category> list = categoryService.list(queryWrapper);
+                .orderByDesc(Category::getUpdateTime)
+                .list();
         return R.success(list);
     }
 }

@@ -44,19 +44,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         User user = userService.getById(userId);
         //查询地址数据
         AddressBook addressBook = addressBookService.getById(orders.getAddressBookId());
-        if (addressBook == null) {
-            throw new RuntimeException("用户地址信息有误，不能下单");
-        }
+
+        // 异常情况
+        if (addressBook == null) throw new RuntimeException("用户地址信息有误，不能下单");
         //查询当前用户的购物车数据
         List<ShoppingCart> shoppingCarts = shoppingCartService.lambdaQuery().eq(ShoppingCart::getUserId, userId).list();
-        if (shoppingCarts == null || shoppingCarts.size() == 0) {
-            throw new RuntimeException("购物车为空，不能下单");
-        }
+        if (shoppingCarts == null || shoppingCarts.size() == 0) throw new RuntimeException("购物车为空，不能下单");
+
+
         //使用mybatis提供的工具类生成订单号
         long orderId = IdWorker.getId();
         // 计算订单总金额
         AtomicInteger amount = new AtomicInteger(0);
-
         //处理订单明细表: 订单明细表的数据来源于购物车表
         List<OrderDetail> orderDetails = shoppingCarts.stream().map((item) -> {
             OrderDetail orderDetail = new OrderDetail();

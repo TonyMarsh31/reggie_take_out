@@ -67,9 +67,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             flavor.setDishId(dishID);
         }
         // 先删除原有的口味数据
-        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(DishFlavor::getDishId, dishID);
-        dishFlavorService.remove(queryWrapper);
+        dishFlavorService
+                .lambdaUpdate()
+                .eq(DishFlavor::getDishId, dishID)
+                .remove();
         // 再新增新的口味数据
         dishFlavorService.saveBatch(flavors);
     }
@@ -78,9 +79,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     public DishDto getDishDtoWithFlavorById(Long id) {
         Dish dish = this.getById(id);
         // 查询口味信息
-        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(DishFlavor::getDishId, id);
-        List<DishFlavor> flavors = dishFlavorService.list(queryWrapper);
+        List<DishFlavor> flavors = dishFlavorService
+                .lambdaQuery()
+                .eq(DishFlavor::getDishId, id)
+                .list();
         // 将菜品基本信息和口味信息封装到dto中
         DishDto dishDto = new DishDto();
         BeanUtils.copyProperties(dish, dishDto);
@@ -97,7 +99,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Override
     public void updateStatus(Integer status, List<Long> ids) {
         // 当菜品在一个起售中的套餐中时，无法进行停售操作，提示用户需要先停售套餐
-
         // 1. 查询套餐表中正在起售的套餐
         // 2. 根据起售的套餐id查询 套餐菜品关联表，得到所有的在起售套餐中的菜品id
         // 3. 判断：如果前端传递的菜品id中包含了在起售套餐中的菜品id，则说明这个菜品在起售中的套餐中，无法进行停售操作
@@ -105,9 +106,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
             LambdaQueryWrapper<Setmeal> setmealOnSale = new LambdaQueryWrapper<>();
             setmealOnSale.eq(Setmeal::getStatus, 1);
             setmealService.list(setmealOnSale).stream().map(Setmeal::getId).forEach(setmealId -> {
-                LambdaQueryWrapper<SetmealDish> setmealDishOnSale = new LambdaQueryWrapper<>();
-                setmealDishOnSale.eq(SetmealDish::getSetmealId, setmealId);
-                List<SetmealDish> onSaleSetmealDish = setmealDishService.list(setmealDishOnSale);
+                List<SetmealDish> onSaleSetmealDish = setmealDishService
+                        .lambdaQuery()
+                        .eq(SetmealDish::getSetmealId, setmealId)
+                        .list();
                 onSaleSetmealDish.stream().map(SetmealDish::getDishId).forEach(onSaleDishID -> {
                     if (ids.contains(onSaleDishID)) {
                         throw new ObjectStillOnStockException("所要停售的部分菜品目前还在其他套餐中进行贩卖中，无法停售，请考虑先停售套餐");
@@ -117,11 +119,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         }
 
         //正常情况下的停售与起售菜品操作
-        Dish newStatus = new Dish();
-        newStatus.setStatus(status);
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Dish::getId, ids);
-        this.update(newStatus, queryWrapper);
+        this.lambdaUpdate().in(Dish::getId, ids).set(Dish::getStatus, status).update();
     }
 
     /**
@@ -134,15 +132,14 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Override
     public void deleteWithFlavor(List<Long> ids) {
         //先查询菜品是否在起售中
-        List<Dish> dishes = this.list(new LambdaQueryWrapper<Dish>().in(Dish::getId, ids));
-        for (Dish dish : dishes) {
+        this.lambdaQuery().in(Dish::getId, ids).list().forEach(dish -> {
             if (dish.getStatus() == 1) {
-                throw new ObjectStillOnStockException(dish.getName() + "菜品目前还在起售中，无法删除");
+                throw new ObjectStillOnStockException(dish.getName() + "目前还在起售中，无法删除，请考虑先停售菜品");
             }
-        }
+        });
         // 逻辑删除菜品口味信息
-        dishFlavorService.update(new DishFlavor().setIsDeleted(1), new LambdaQueryWrapper<DishFlavor>().in(DishFlavor::getDishId, ids));
+        dishFlavorService.lambdaUpdate().in(DishFlavor::getDishId, ids).set(DishFlavor::getIsDeleted, 1).update();
         // 逻辑删除菜品信息
-        this.update(new Dish().setIsDeleted(1), new LambdaQueryWrapper<Dish>().in(Dish::getId, ids));
+        this.lambdaUpdate().in(Dish::getId, ids).set(Dish::getIsDeleted, 1).update();
     }
 }

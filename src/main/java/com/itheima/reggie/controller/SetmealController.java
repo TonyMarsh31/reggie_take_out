@@ -45,11 +45,12 @@ public class SetmealController {
      */
     @GetMapping("/list")
     public R<List<Setmeal>> list(Setmeal setmeal) {
-        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId())
+        List<Setmeal> setmealList = setmealService
+                .lambdaQuery()
                 .eq(Setmeal::getIsDeleted, 0)
-                .eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
-        List<Setmeal> setmealList = setmealService.list(queryWrapper);
+                .eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId())
+                .eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus())
+                .list();
         return R.success(setmealList);
     }
 
@@ -58,20 +59,24 @@ public class SetmealController {
      *
      * @param setmeal 封装的查询条件
      */
-    // todo 不知道前端的请求路径，暂时空置
+    //TODO 前端没有这个接口
     public R<List<Dish>> getDish(Setmeal setmeal) {
         // 1.查关系表，获取套餐绑定的菜品ID
-        List<SetmealDish> setmealDishList = setmealDishService.list(new LambdaQueryWrapper<SetmealDish>()
-                .eq(setmeal.getId() != null, SetmealDish::getSetmealId, setmeal.getId()));
+        List<SetmealDish> setmealDishList = setmealDishService
+                .lambdaQuery()
+                .eq(setmeal.getId() != null, SetmealDish::getSetmealId, setmeal.getId())
+                .list();
         List<Long> dishIds = setmealDishList.stream().map(SetmealDish::getDishId).collect(Collectors.toList());
         // 2.根据菜品ID查询菜品信息
-        List<Dish> dishList = dishService.list(new LambdaQueryWrapper<Dish>().in(Dish::getId, dishIds));
+        List<Dish> dishList = dishService
+                .lambdaQuery()
+                .in(dishIds.size() > 0, Dish::getId, dishIds)
+                .list();
         return R.success(dishList);
     }
 
     @PostMapping
     public R<String> save(@RequestBody SetmealDto setmealDto) {
-        log.info("套餐信息：{}", setmealDto);
         setmealService.saveWithDish(setmealDto);
         return R.success("新增套餐成功");
     }
@@ -79,7 +84,6 @@ public class SetmealController {
 
     @PutMapping
     public R<String> update(@RequestBody SetmealDto setmealDto) {
-        log.info("套餐信息：{}", setmealDto);
         setmealService.updateWithDish(setmealDto);
         return R.success("修改套餐成功");
     }
@@ -92,7 +96,10 @@ public class SetmealController {
         Setmeal setmeal = setmealService.getById(id);
         SetmealDto setmealDto = new SetmealDto();
         BeanUtils.copyProperties(setmeal, setmealDto);
-        List<SetmealDish> setmealDishList = setmealDishService.list(new LambdaQueryWrapper<SetmealDish>().eq(SetmealDish::getSetmealId, id));
+        List<SetmealDish> setmealDishList = setmealDishService
+                .lambdaQuery()
+                .eq(SetmealDish::getSetmealId, id)
+                .list();
         setmealDto.setSetmealDishes(setmealDishList);
         setmealDto.setCategoryName(categoryService.getById(setmeal.getCategoryId()).getName());
         return R.success(setmealDto);
@@ -146,7 +153,6 @@ public class SetmealController {
      */
     @PostMapping("/status/{status}")
     public R<String> updateStatus(@PathVariable Integer status, @RequestParam List<Long> ids) {
-        log.info("status:{},ids:{}", status, ids);
         setmealService.updateStatus(status, ids);
         return R.success("修改成功");
     }

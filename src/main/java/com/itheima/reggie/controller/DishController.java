@@ -6,6 +6,7 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.DishFlavor;
+import com.itheima.reggie.exception.UnclassifiedBusinessException;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
@@ -37,14 +38,12 @@ public class DishController {
 
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto) {
-        log.info("dishDto:{}", dishDto);
         dishService.saveWithFlavor(dishDto);
         return R.success("新增成功");
     }
 
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto) {
-        log.info("dishDto:{}", dishDto);
         dishService.updateWithFlavor(dishDto);
         return R.success("修改成功");
     }
@@ -74,7 +73,7 @@ public class DishController {
                 String categoryName = categoryService.getById(categoryId).getName();
                 dishDto.setCategoryName(categoryName);
             });
-            categoryID.orElseThrow(() -> new RuntimeException("存在菜品没有分类"));
+            categoryID.orElseThrow(() -> new UnclassifiedBusinessException("存在菜品没有分类"));
             return dishDto;
         }).collect(Collectors.toList());
         dishDtoPage.setRecords(dishDtoList);
@@ -94,21 +93,23 @@ public class DishController {
      */
     @GetMapping("/list")
     public R<List<DishDto>> list(Dish condition) {
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper
+        List<Dish> dishList = dishService
+                .lambdaQuery()
                 .eq(condition.getCategoryId() != null, Dish::getCategoryId, condition.getCategoryId())
                 .eq(Dish::getStatus, 1) // 仅查询上架的菜品
                 .eq(Dish::getIsDeleted, 0) // 仅展示未逻辑删除的菜品
                 .orderByAsc(condition.getSort() != null, Dish::getSort)
-                .orderByDesc(condition.getUpdateTime() != null, Dish::getUpdateTime);
-        List<Dish> dishList = dishService.list(queryWrapper);
+                .orderByDesc(condition.getUpdateTime() != null, Dish::getUpdateTime)
+                .list();
         // 将Dish对象转换为DishDto对象,添加口味数据
         List<DishDto> dishDtoList = dishList.stream().map(dish -> {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(dish, dishDto);
             // 查询口味信息
-            List<DishFlavor> dishFlavorList = dishFlavorService.list(
-                    new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dish.getId()));
+            List<DishFlavor> dishFlavorList = dishFlavorService
+                    .lambdaQuery()
+                    .eq(DishFlavor::getDishId, dish.getId())
+                    .list();
             dishDto.setFlavors(dishFlavorList);
             return dishDto;
         }).collect(Collectors.toList());
@@ -117,7 +118,6 @@ public class DishController {
 
     @PostMapping("/status/{status}")
     public R<String> updateStatus(@PathVariable Integer status, @RequestParam List<Long> ids) {
-        log.info("status:{},ids:{}", status, ids);
         dishService.updateStatus(status, ids);
         return R.success("修改成功");
     }

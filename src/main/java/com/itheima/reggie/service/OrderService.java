@@ -8,7 +8,7 @@ public interface OrderService extends IService<Orders> {
     /**
      * 用户下单
      *
-     * @param orders
+     * @param orders 订单信息
      */
     void submit(Orders orders);
 }
