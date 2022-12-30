@@ -10,16 +10,17 @@ import com.itheima.reggie.mapper.CategoryMapper;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishService;
 import com.itheima.reggie.service.SetmealService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
 
-    private final DishService dishService;
     private final SetmealService setmealService;
+    @Autowired
+    private DishService dishService;
 
-    public CategoryServiceImpl(DishService dishService, SetmealService setmealService) {
-        this.dishService = dishService;
+    public CategoryServiceImpl(SetmealService setmealService) {
         this.setmealService = setmealService;
     }
 

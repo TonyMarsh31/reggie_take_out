@@ -1,6 +1,8 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
@@ -9,16 +11,15 @@ import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.exception.ObjectStillOnStockException;
 import com.itheima.reggie.mapper.DishMapper;
-import com.itheima.reggie.service.DishFlavorService;
-import com.itheima.reggie.service.DishService;
-import com.itheima.reggie.service.SetmealDishService;
-import com.itheima.reggie.service.SetmealService;
+import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,6 +28,9 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     private final DishFlavorService dishFlavorService;
     private final SetmealService setmealService;
     private final SetmealDishService setmealDishService;
+
+    @Autowired
+    private CategoryService categoryService;
 
     public DishServiceImpl(DishFlavorService dishFlavorService, SetmealService setmealService, SetmealDishService setmealDishService) {
         this.dishFlavorService = dishFlavorService;
@@ -141,5 +145,41 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         dishFlavorService.lambdaUpdate().in(DishFlavor::getDishId, ids).set(DishFlavor::getIsDeleted, 1).update();
         // 逻辑删除菜品信息
         this.lambdaUpdate().in(Dish::getId, ids).set(Dish::getIsDeleted, 1).update();
+    }
+
+    /**
+     * 查询菜品分页数据
+     *
+     * @param pageWrapper 分页参数包装类
+     * @param queryName   菜品名称
+     */
+    @Override
+    public void getDishPage(Page<Dish> pageWrapper, String queryName) {
+        this.lambdaQuery()
+                .like(StringUtils.isNotBlank(queryName), Dish::getName, queryName)
+                .eq(Dish::getIsDeleted, 0)
+                .orderByDesc(Dish::getUpdateTime)
+                .page(pageWrapper);
+    }
+
+    /**
+     * 将菜品分页数据转为dto分页数据，dto中增加了口味数据与分类名称
+     *
+     * @param dishPage 菜品分页数据
+     * @return 菜品dto分页数据
+     */
+    @Override
+    public Page<DishDto> convertDishPageToDishDtoPage(Page<Dish> dishPage) {
+        Page<DishDto> dishDtoPage = new Page<>();
+        BeanUtils.copyProperties(dishPage, dishDtoPage, "records");
+        List<DishDto> dishDtoList = dishPage.getRecords().stream().map(dish -> {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(dish, dishDto);
+            dishDto.setCategoryName(categoryService.getById(dish.getCategoryId()).getName());
+            dishDto.setFlavors(dishFlavorService.lambdaQuery().eq(DishFlavor::getDishId, dish.getId()).list());
+            return dishDto;
+        }).collect(Collectors.toList());
+        dishDtoPage.setRecords(dishDtoList);
+        return dishDtoPage;
     }
 }

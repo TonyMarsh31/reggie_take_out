@@ -65,8 +65,10 @@ public class AddressBookController {
                 .eq(AddressBook::getUserId, BaseContext.getCurrentId())
                 .update();
         // 2.将传递的地址设置为默认
-        addressBook.setIsDefault(1);
-        addressBookService.updateById(addressBook);
+        addressBookService.lambdaUpdate()
+                .set(AddressBook::getIsDefault, 1)
+                .eq(AddressBook::getId, addressBook.getId())
+                .update();
         return R.success(addressBook);
     }
 
