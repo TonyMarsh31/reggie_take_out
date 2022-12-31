@@ -169,7 +169,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      * @return 菜品dto分页数据
      */
     @Override
-    public Page<DishDto> convertDishPageToDishDtoPage(Page<Dish> dishPage) {
+    public Page<DishDto> convertToDishDtoPage(Page<Dish> dishPage) {
         Page<DishDto> dishDtoPage = new Page<>();
         BeanUtils.copyProperties(dishPage, dishDtoPage, "records");
         List<DishDto> dishDtoList = dishPage.getRecords().stream().map(dish -> {
@@ -181,5 +181,39 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         }).collect(Collectors.toList());
         dishDtoPage.setRecords(dishDtoList);
         return dishDtoPage;
+    }
+
+
+    /**
+     * 根据分类查询菜品信息（同时根据菜品自身的sort属性与更新时间信息排序）
+     *
+     * @param queryCondition 查询条件包装类
+     * @return 菜品信息
+     */
+    @Override
+    public List<Dish> getDishListByCategory(Dish queryCondition) {
+        return this.lambdaQuery()
+                .eq(queryCondition.getCategoryId() != null, Dish::getCategoryId, queryCondition.getCategoryId())
+                .eq(Dish::getStatus, 1) // 只查询起售中的菜品
+                .eq(Dish::getIsDeleted, 0) // 只查询未删除的菜品
+                .orderByAsc(Dish::getSort) // 根据sort属性排序
+                .orderByDesc(Dish::getUpdateTime) // 根据更新时间排序
+                .list();
+    }
+
+    /**
+     * 将菜品信息转为DTO，dto中添加了口味信息
+     *
+     * @param dishList 菜品信息
+     * @return 菜品信息DTO
+     */
+    @Override
+    public List<DishDto> convertToDishDtoList(List<Dish> dishList) {
+        return dishList.stream().map(dish -> {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(dish, dishDto);
+            dishDto.setFlavors(dishFlavorService.lambdaQuery().eq(DishFlavor::getDishId, dish.getId()).list());
+            return dishDto;
+        }).collect(Collectors.toList());
     }
 }

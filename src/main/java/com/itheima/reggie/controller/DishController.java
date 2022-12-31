@@ -4,15 +4,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
-import com.itheima.reggie.entity.DishFlavor;
-import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 菜品管理
@@ -22,12 +18,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DishController {
     private final DishService dishService;
-    private final DishFlavorService dishFlavorService;
 
-
-    public DishController(DishService dishService, DishFlavorService dishFlavorService) {
+    public DishController(DishService dishService) {
         this.dishService = dishService;
-        this.dishFlavorService = dishFlavorService;
     }
 
     @PostMapping
@@ -46,7 +39,7 @@ public class DishController {
     public R<Page<DishDto>> page(int page, int pageSize, String name) {
         Page<Dish> dishPage = new Page<>(page, pageSize);
         dishService.getDishPage(dishPage, name);
-        Page<DishDto> dishDtoPage = dishService.convertDishPageToDishDtoPage(dishPage);
+        Page<DishDto> dishDtoPage = dishService.convertToDishDtoPage(dishPage);
         return R.success(dishDtoPage);
     }
 
@@ -63,26 +56,9 @@ public class DishController {
      */
     @GetMapping("/list")
     public R<List<DishDto>> list(Dish condition) {
-        List<Dish> dishList = dishService
-                .lambdaQuery()
-                .eq(condition.getCategoryId() != null, Dish::getCategoryId, condition.getCategoryId())
-                .eq(Dish::getStatus, 1) // 仅查询上架的菜品
-                .eq(Dish::getIsDeleted, 0) // 仅展示未逻辑删除的菜品
-                .orderByAsc(condition.getSort() != null, Dish::getSort)
-                .orderByDesc(condition.getUpdateTime() != null, Dish::getUpdateTime)
-                .list();
-        // 将Dish对象转换为DishDto对象,添加口味数据
-        List<DishDto> dishDtoList = dishList.stream().map(dish -> {
-            DishDto dishDto = new DishDto();
-            BeanUtils.copyProperties(dish, dishDto);
-            // 查询口味信息
-            List<DishFlavor> dishFlavorList = dishFlavorService
-                    .lambdaQuery()
-                    .eq(DishFlavor::getDishId, dish.getId())
-                    .list();
-            dishDto.setFlavors(dishFlavorList);
-            return dishDto;
-        }).collect(Collectors.toList());
+        List<Dish> dishListByCategory = dishService.getDishListByCategory(condition);
+        // 将Dish对象转换为DishDto对象,其额外添加了口味数据
+        List<DishDto> dishDtoList = dishService.convertToDishDtoList(dishListByCategory);
         return R.success(dishDtoList);
     }
 
