@@ -43,7 +43,7 @@ public interface DishService extends IService<Dish> {
     DishDto getDishDtoWithFlavorById(Long id);
 
     /**
-     * 查询菜品分页数据
+     * 查询菜品分页数据,没有返回值是因为数据直接封装到page对象中了
      *
      * @param pageWrapper 分页参数包装类
      * @param queryName   菜品名称
@@ -51,10 +51,26 @@ public interface DishService extends IService<Dish> {
     void getDishPage(Page<Dish> pageWrapper, String queryName);
 
     /**
+     * 根据分类查询菜品信息（同时根据菜品自身的sort属性与更新时间信息排序）
+     *
+     * @param queryCondition 查询条件包装类
+     * @return 菜品信息
+     */
+    List<Dish> getDishListByCategory(Dish queryCondition);
+
+    /**
      * 将菜品分页数据转为dto分页数据，dto中增加了口味数据与分类名称
      *
      * @param dishPage 菜品分页数据
      * @return 菜品dto分页数据
      */
-    Page<DishDto> convertDishPageToDishDtoPage(Page<Dish> dishPage);
+    Page<DishDto> convertToDishDtoPage(Page<Dish> dishPage);
+
+    /**
+     * 将菜品信息转为DTO，dto中添加了口味信息
+     *
+     * @param dishList 菜品信息
+     * @return 菜品信息DTO
+     */
+    List<DishDto> convertToDishDtoList(List<Dish> dishList);
 }
