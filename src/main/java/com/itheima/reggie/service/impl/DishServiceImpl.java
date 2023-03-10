@@ -64,7 +64,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
     @Override
     public void saveWithFlavor(DishDto dishDto) {
         // 保存菜品基本信息
-        this.save(dishDto);
+        save(dishDto);
         // 保存菜品口味信息
         // 前端传递的口味数据中只有name和value，这里手动为每一个flavor绑定dishID
         Long dishID = dishDto.getId();
@@ -171,7 +171,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      */
     @Override
     public void getDishPage(Page<Dish> pageWrapper, String queryName) {
-        this.lambdaQuery()
+        lambdaQuery()
                 .like(StringUtils.isNotBlank(queryName), Dish::getName, queryName)
                 .eq(Dish::getIsDeleted, 0)
                 .orderByDesc(Dish::getUpdateTime)
@@ -208,12 +208,19 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
      */
     @Override
     public List<Dish> getDishListByCategory(Dish queryCondition) {
-        return this.lambdaQuery()
+        return lambdaQuery()
                 .eq(queryCondition.getCategoryId() != null, Dish::getCategoryId, queryCondition.getCategoryId())
                 .eq(Dish::getStatus, 1) // 只查询起售中的菜品
                 .eq(Dish::getIsDeleted, 0) // 只查询未删除的菜品
                 .orderByAsc(Dish::getSort) // 根据sort属性排序
                 .orderByDesc(Dish::getUpdateTime) // 根据更新时间排序
+                .list();
+    }
+
+    @Override
+    public List<Dish> getDishListByMultiID(List<Long> ids) {
+        return lambdaQuery()
+                .in(ids.size() > 0, Dish::getId, ids)
                 .list();
     }
 

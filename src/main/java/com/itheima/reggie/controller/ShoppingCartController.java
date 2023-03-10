@@ -79,11 +79,7 @@ public class ShoppingCartController {
      */
     @GetMapping("/list")
     public R<List<ShoppingCart>> list() {
-        List<ShoppingCart> list = shoppingCartService
-                .lambdaQuery()
-                .eq(ShoppingCart::getUserId, BaseContext.getCurrentId())
-                .orderByAsc(ShoppingCart::getCreateTime)
-                .list();
+        List<ShoppingCart> list = shoppingCartService.getDataByUserIDAsList(BaseContext.getCurrentId());
         return R.success(list);
     }
 
@@ -92,11 +88,7 @@ public class ShoppingCartController {
      */
     @DeleteMapping("/clean")
     public R<String> clean() {
-        //SQL:delete from shopping_cart where user_id = ?
-        shoppingCartService
-                .lambdaUpdate()
-                .eq(ShoppingCart::getUserId, BaseContext.getCurrentId())
-                .remove();
+        shoppingCartService.removeDataByUserID(BaseContext.getCurrentId());
         return R.success("清空购物车成功");
     }
 }

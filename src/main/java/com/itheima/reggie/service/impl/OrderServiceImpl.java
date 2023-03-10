@@ -2,6 +2,7 @@ package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.entity.*;
@@ -10,6 +11,7 @@ import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -87,10 +89,22 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         orders.setPhone(addressBook.getPhone());
         orders.setAddress((addressBook.getProvinceName() == null ? "" : addressBook.getProvinceName()) + (addressBook.getCityName() == null ? "" : addressBook.getCityName()) + (addressBook.getDistrictName() == null ? "" : addressBook.getDistrictName()) + (addressBook.getDetail() == null ? "" : addressBook.getDetail()));
         //向订单表插入数据，一条数据
-        this.save(orders);
+        save(orders);
 
 
         //清空购物车数据
         shoppingCartService.remove(new LambdaQueryWrapper<ShoppingCart>().eq(ShoppingCart::getUserId, userId));
+    }
+
+    @Override
+    public Page<Orders> getDataAsPage(int page, int pageSize, Long number, String beginTime, String endTime) {
+        Page<Orders> ordersPage = new Page<>(page, pageSize);
+        lambdaQuery()
+                .eq(number != null, Orders::getId, number) //订单号
+                //时间段，大于开始，小于结束
+                .gt(StringUtils.hasText(beginTime), Orders::getOrderTime, beginTime)
+                .lt(StringUtils.hasText(endTime), Orders::getOrderTime, endTime)
+                .page(ordersPage);
+        return ordersPage;
     }
 }

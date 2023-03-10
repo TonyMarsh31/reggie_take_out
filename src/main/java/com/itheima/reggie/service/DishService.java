@@ -58,6 +58,8 @@ public interface DishService extends IService<Dish> {
      */
     List<Dish> getDishListByCategory(Dish queryCondition);
 
+    List<Dish> getDishListByMultiID(List<Long> ids);
+
     /**
      * 将菜品分页数据转为dto分页数据，dto中增加了口味数据与分类名称
      *

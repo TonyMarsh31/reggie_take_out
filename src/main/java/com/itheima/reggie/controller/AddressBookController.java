@@ -59,16 +59,7 @@ public class AddressBookController {
      */
     @PutMapping("default")
     public R<AddressBook> setDefault(@RequestBody AddressBook addressBook) {
-        // 1.将当前用户的所有地址设置为非默认
-        addressBookService.lambdaUpdate()
-                .set(AddressBook::getIsDefault, 0)
-                .eq(AddressBook::getUserId, BaseContext.getCurrentId())
-                .update();
-        // 2.将传递的地址设置为默认
-        addressBookService.lambdaUpdate()
-                .set(AddressBook::getIsDefault, 1)
-                .eq(AddressBook::getId, addressBook.getId())
-                .update();
+        addressBookService.setDefaultAddressTo(addressBook);
         return R.success(addressBook);
     }
 
@@ -86,11 +77,7 @@ public class AddressBookController {
      */
     @GetMapping("default")
     public R<AddressBook> getDefault() {
-        AddressBook addressBook = addressBookService
-                .lambdaQuery()
-                .eq(AddressBook::getUserId, BaseContext.getCurrentId())
-                .eq(AddressBook::getIsDefault, 1)
-                .one();
+        AddressBook addressBook = addressBookService.getDefaultAddress(BaseContext.getCurrentId());
         return addressBook != null ? R.success(addressBook) : R.error("没有找到该对象");
     }
 
@@ -99,10 +86,7 @@ public class AddressBookController {
      */
     @GetMapping("/list")
     public R<List<AddressBook>> list() {
-        List<AddressBook> result = addressBookService.lambdaQuery()
-                .eq(AddressBook::getUserId, BaseContext.getCurrentId())
-                .orderByDesc(AddressBook::getUpdateTime)
-                .list();
+        List<AddressBook> result = addressBookService.getAllAddress(BaseContext.getCurrentId());
         return R.success(result);
     }
 }

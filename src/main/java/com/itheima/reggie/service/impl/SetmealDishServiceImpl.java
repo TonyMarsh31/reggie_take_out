@@ -7,7 +7,15 @@ import com.itheima.reggie.service.SetmealDishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class SetmealDishServiceImpl extends ServiceImpl<SetmealDishMapper, SetmealDish> implements SetmealDishService {
+    @Override
+    public List<SetmealDish> getDataBySetmealIdAsList(Long setmealId) {
+        return lambdaQuery()
+                .eq(setmealId != null, SetmealDish::getSetmealId, setmealId)
+                .list();
+    }
 }

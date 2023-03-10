@@ -1,5 +1,6 @@
 package com.itheima.reggie.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
@@ -36,4 +37,8 @@ public interface SetmealService extends IService<Setmeal> {
      * @param ids    套餐主键列表
      */
     void updateStatus(Integer status, List<Long> ids);
+
+    List<Setmeal> getDataByCategoryIDAndStatusAsList(Setmeal conditionWrapper);
+
+    Page<Setmeal> getDataByNameAsPage(int page, int pageSize, String name);
 }

@@ -1,6 +1,5 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.SetmealDto;
@@ -93,27 +92,17 @@ public class SetmealController {
     /**
      * 根据分类查询套餐
      */
-    @Cacheable(value = "setmealByCategory", key = "#setmeal.categoryId")
+    @Cacheable(value = "setmealByCategory", key = "#conditionWrapper.categoryId")
     @GetMapping("/list")
-    public R<List<Setmeal>> list(Setmeal setmeal) {
-        List<Setmeal> setmealList = setmealService
-                .lambdaQuery()
-                .eq(Setmeal::getIsDeleted, 0)
-                .eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId())
-                .eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus())
-                .list();
+    public R<List<Setmeal>> list(Setmeal conditionWrapper) {
+        List<Setmeal> setmealList = setmealService.getDataByCategoryIDAndStatusAsList(conditionWrapper);
         return R.success(setmealList);
     }
 
     @GetMapping("/page")
     public R<Page<SetmealDto>> page(int page, int pageSize, String name) {
         // 查询套餐的基础信息
-        Page<Setmeal> setmealPage = new Page<>(page, pageSize);
-        setmealService.lambdaQuery()
-                .eq(Setmeal::getIsDeleted, 0)
-                .like(StringUtils.isNotBlank(name), Setmeal::getName, name)
-                .orderByDesc(Setmeal::getUpdateTime)
-                .page(setmealPage);
+        Page<Setmeal> setmealPage = setmealService.getDataByNameAsPage(page, pageSize, name);
         //将setmealPage转换为setmealDtoPage,添加分类名称与嵌套的菜品信息
         Page<SetmealDto> setmealDtoPage = new Page<>();
         BeanUtils.copyProperties(setmealPage, setmealDtoPage, "records");
@@ -137,16 +126,10 @@ public class SetmealController {
     //TODO 用户端和管理端暂时还没有这个需求
     public R<List<Dish>> getDish(Setmeal setmeal) {
         // 1.查关系表，获取套餐绑定的菜品ID
-        List<SetmealDish> setmealDishList = setmealDishService
-                .lambdaQuery()
-                .eq(setmeal.getId() != null, SetmealDish::getSetmealId, setmeal.getId())
-                .list();
+        List<SetmealDish> setmealDishList = setmealDishService.getDataBySetmealIdAsList(setmeal.getId());
         List<Long> dishIds = setmealDishList.stream().map(SetmealDish::getDishId).collect(Collectors.toList());
         // 2.根据菜品ID查询菜品信息
-        List<Dish> dishList = dishService
-                .lambdaQuery()
-                .in(dishIds.size() > 0, Dish::getId, dishIds)
-                .list();
+        List<Dish> dishList = dishService.getDishListByMultiID(dishIds);
         return R.success(dishList);
     }
 

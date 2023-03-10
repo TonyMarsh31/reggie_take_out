@@ -1,6 +1,5 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
@@ -82,11 +81,8 @@ public class EmployeeController {
     @GetMapping("/page")
     public R<Page<Employee>> page(int page, int pageSize, String name) {
         log.info("page:{},pageSize:{},name:{}", page, pageSize, name);
-        Page<Employee> pageParam = new Page<>(page, pageSize);
-        LambdaQueryWrapper<Employee> employeeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        employeeLambdaQueryWrapper.like(name != null, Employee::getName, name);
-        employeeService.page(pageParam, employeeLambdaQueryWrapper);
-        return R.success(pageParam);
+        Page<Employee> data = employeeService.getDataByNameAsPage(page, pageSize, name);
+        return R.success(data);
     }
 
     /**

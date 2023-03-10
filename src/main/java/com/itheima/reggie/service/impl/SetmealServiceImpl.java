@@ -1,6 +1,8 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
@@ -34,7 +36,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     @Transactional
     public void saveWithDish(SetmealDto setmealDto) {
         // 1. 保存套餐的基本信息
-        this.save(setmealDto);
+        save(setmealDto);
         // 2. 保存套餐对应的菜品信息到关系表中
         List<SetmealDish> setmealDishes = setmealDto.getSetmealDishes();
         // DTO中的菜品数据缺少套餐id，需要手动设置
@@ -50,7 +52,7 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     @Override
     public void updateWithDish(SetmealDto setmealDto) {
         // 1. 更新套餐的基本信息
-        this.updateById(setmealDto);
+        updateById(setmealDto);
         // 2. 更新套餐对应的菜品信息到关系表中,先删除，再新增
         setmealDishService.lambdaUpdate()
                 .eq(SetmealDish::getSetmealId, setmealDto.getId())
@@ -91,9 +93,30 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
      */
     @Override
     public void updateStatus(Integer status, List<Long> ids) {
-        this.lambdaUpdate()
+        lambdaUpdate()
                 .in(Setmeal::getId, ids)
                 .set(Setmeal::getStatus, status)
                 .update();
     }
+
+    @Override
+    public List<Setmeal> getDataByCategoryIDAndStatusAsList(Setmeal conditionWrapper) {
+        return lambdaQuery()
+                .eq(Setmeal::getIsDeleted, 0)
+                .eq(conditionWrapper.getCategoryId() != null, Setmeal::getCategoryId, conditionWrapper.getCategoryId())
+                .eq(conditionWrapper.getStatus() != null, Setmeal::getStatus, conditionWrapper.getStatus())
+                .list();
+    }
+
+    @Override
+    public Page<Setmeal> getDataByNameAsPage(int page, int pageSize, String name) {
+        Page<Setmeal> setmealPage = new Page<>(page, pageSize);
+        lambdaQuery()
+                .eq(Setmeal::getIsDeleted, 0)
+                .like(StringUtils.isNotBlank(name), Setmeal::getName, name)
+                .orderByDesc(Setmeal::getUpdateTime)
+                .page(setmealPage);
+        return setmealPage;
+    }
+
 }
