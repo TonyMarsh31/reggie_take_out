@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
-import com.itheima.reggie.exception.ObjectStillOnStockException;
+import com.itheima.reggie.exception.BusinessExceptionEnum;
 import com.itheima.reggie.mapper.SetmealMapper;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
@@ -73,7 +73,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         // 先判断是否仍在售卖中，是则取消删除
         LambdaQueryWrapper<Setmeal> objectOnStock = new LambdaQueryWrapper<>();
         objectOnStock.in(Setmeal::getId, ids).eq(Setmeal::getStatus, 1);
-        if (this.count(objectOnStock) > 0) throw new ObjectStillOnStockException();
+//        if (this.count(objectOnStock) > 0) throw new ObjectStillOnStockException();
+        if (this.count(objectOnStock) > 0) throw BusinessExceptionEnum.OBJECT_STILL_ON_STOCK.toException();
         // 需要删除的： 1. 套餐基本信息 2. 套餐对应的菜品信息 , 全部进行逻辑删除
         this.lambdaUpdate()
                 .in(Setmeal::getId, ids)

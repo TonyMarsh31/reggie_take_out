@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
-import com.itheima.reggie.exception.ObjectContainsNestedProperties;
+import com.itheima.reggie.exception.BusinessExceptionEnum;
 import com.itheima.reggie.mapper.CategoryMapper;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishService;
@@ -53,9 +53,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
         // TODO 这段代码应该抽取到另一个Service或者Controller中，直接在此处实现会有循环依赖的问题
         //先查询该分类下是否有菜品或套餐
         Integer count = dishService.lambdaQuery().eq(Dish::getCategoryId, id).count();
-        if (count > 0) throw new ObjectContainsNestedProperties("该分类下已有菜品，无法进行删除");
+//        if (count > 0) throw new ObjectContainsNestedProperties("该分类下已有菜品，无法进行删除");
+        if (count > 0)
+            throw BusinessExceptionEnum.NESTED_PROPERTY.toExceptionWithDetail("该分类下已有菜品，无法进行删除");
         Integer count1 = setmealService.lambdaQuery().eq(Setmeal::getCategoryId, id).count();
-        if (count1 > 0) throw new ObjectContainsNestedProperties("该分类下已有套餐，无法进行删除");
+//        if (count1 > 0) throw new ObjectContainsNestedProperties("该分类下已有套餐，无法进行删除");
+        if (count1 > 0)
+            throw BusinessExceptionEnum.NESTED_PROPERTY.toExceptionWithDetail("该分类下已有套餐，无法进行删除");
         //如果没有，就删除
         baseMapper.deleteById(id);
     }

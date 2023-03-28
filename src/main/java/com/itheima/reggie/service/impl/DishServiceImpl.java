@@ -9,7 +9,7 @@ import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
-import com.itheima.reggie.exception.ObjectStillOnStockException;
+import com.itheima.reggie.exception.BusinessExceptionEnum;
 import com.itheima.reggie.mapper.DishMapper;
 import com.itheima.reggie.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -132,7 +132,10 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
                         .list();
                 onSaleSetmealDish.stream().map(SetmealDish::getDishId).forEach(onSaleDishID -> {
                     if (ids.contains(onSaleDishID)) {
-                        throw new ObjectStillOnStockException("所要停售的部分菜品目前还在其他套餐中进行贩卖中，无法停售，请考虑先停售套餐");
+//                        throw new ObjectStillOnStockException("所要停售的部分菜品目前还在其他套餐中进行贩卖中，无法停售，请考虑先停售套餐");
+                        throw BusinessExceptionEnum
+                                .OBJECT_STILL_ON_STOCK
+                                .toExceptionWithDetail("所要停售的部分菜品目前还在其他套餐中进行贩卖中，无法停售，请考虑先停售套餐");
                     }
                 });
             });
@@ -154,7 +157,8 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements Di
         //先查询菜品是否在起售中
         this.lambdaQuery().in(Dish::getId, ids).list().forEach(dish -> {
             if (dish.getStatus() == 1) {
-                throw new ObjectStillOnStockException(dish.getName() + "目前还在起售中，无法删除，请考虑先停售菜品");
+//                throw new ObjectStillOnStockException(dish.getName() + "目前还在起售中，无法删除，请考虑先停售菜品");
+                throw BusinessExceptionEnum.OBJECT_STILL_ON_STOCK.toExceptionWithDetail(dish.getName() + "目前还在起售中，无法删除，请考虑先停售菜品");
             }
         });
         // 逻辑删除菜品口味信息
