@@ -87,7 +87,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         orders.setUserName(user.getName());
         orders.setConsignee(addressBook.getConsignee());
         orders.setPhone(addressBook.getPhone());
-        orders.setAddress((addressBook.getProvinceName() == null ? "" : addressBook.getProvinceName()) + (addressBook.getCityName() == null ? "" : addressBook.getCityName()) + (addressBook.getDistrictName() == null ? "" : addressBook.getDistrictName()) + (addressBook.getDetail() == null ? "" : addressBook.getDetail()));
+        orders.setAddress((addressBook.getProvinceName() == null ? "" :
+                addressBook.getProvinceName())
+                + (addressBook.getCityName() == null ? "" : addressBook.getCityName())
+                + (addressBook.getDistrictName() == null ? "" : addressBook.getDistrictName())
+                + (addressBook.getDetail() == null ? "" : addressBook.getDetail()));
         //向订单表插入数据，一条数据
         save(orders);
 
