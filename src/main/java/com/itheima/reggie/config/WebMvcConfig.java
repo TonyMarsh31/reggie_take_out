@@ -2,9 +2,11 @@ package com.itheima.reggie.config;
 
 import com.itheima.reggie.common.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
@@ -38,5 +40,10 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         mappingJackson2HttpMessageConverter.setObjectMapper(new JacksonObjectMapper());
         // 将新的消息转换器添加到消息转换器列表中,并将其放在第一位,以防止仍然使用默认的消息转换器
         converters.add(0, mappingJackson2HttpMessageConverter);
+    }
+
+    @Bean
+    public RequestContextListener requestContextListener() {
+        return new RequestContextListener();
     }
 }

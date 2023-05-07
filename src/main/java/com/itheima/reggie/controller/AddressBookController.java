@@ -2,10 +2,12 @@ package com.itheima.reggie.controller;
 
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
+import com.itheima.reggie.common.UserInfo;
 import com.itheima.reggie.entity.AddressBook;
 import com.itheima.reggie.exception.UnclassifiedBusinessException;
 import com.itheima.reggie.service.AddressBookService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -81,12 +83,15 @@ public class AddressBookController {
         return addressBook != null ? R.success(addressBook) : R.error("没有找到该对象");
     }
 
+    @Autowired
+    UserInfo userInfo;
     /**
      * 查询用户的全部地址
      */
     @GetMapping("/list")
     public R<List<AddressBook>> list() {
-        List<AddressBook> result = addressBookService.getAllAddress(BaseContext.getCurrentId());
+//        List<AddressBook> result = addressBookService.getAllAddress(BaseContext.getCurrentId());
+        List<AddressBook> result = addressBookService.getAllAddress(userInfo.getUserId());
         return R.success(result);
     }
 }

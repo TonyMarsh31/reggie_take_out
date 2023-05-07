@@ -3,7 +3,9 @@ package com.itheima.reggie.filter;
 import com.alibaba.fastjson.JSON;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
+import com.itheima.reggie.common.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.*;
@@ -18,6 +20,9 @@ import java.io.IOException;
 @WebFilter(urlPatterns = "/*")
 @Slf4j
 public class LoginCheckFilter implements Filter {
+
+    @Autowired
+    private UserInfo userinfo;
     //Spring 提供的工具类，用于匹配路径，支持通配符
     public static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
@@ -41,12 +46,14 @@ public class LoginCheckFilter implements Filter {
         // 若管理端用户已登录(Session中存在对应属性),则放行
         if (request.getSession().getAttribute("employee") != null) {
             BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+            userinfo.setUserId((Long) request.getSession().getAttribute("employee"));
             filterChain.doFilter(request, response);
             return;
         }
         // 若客户端用户已登录(Session中存在对应属性),则放行
         if (request.getSession().getAttribute("user") != null) {
             BaseContext.setCurrentId((Long) request.getSession().getAttribute("user"));
+            userinfo.setUserId((Long) request.getSession().getAttribute("user"));
             filterChain.doFilter(request, response);
             return;
         }
